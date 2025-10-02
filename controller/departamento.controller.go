@@ -33,8 +33,19 @@ func InstanciarDepartamentoController(grupoV1 *echo.Group, departamentoService *
 }
 
 func (c *DepartamentoController) obterDepartamentosPaginado(contexto echo.Context) error {
-	pesquisa := ""
-	var ultimoDepartamento *int64 // TODO precisa receber esses dois valores
+	var (
+		pesquisa                 = contexto.QueryParam("pesquisa")
+		ultimoDepartamentoString = contexto.QueryParam("ultimoDepartamento")
+		ultimoDepartamento       *int64
+	)
+
+	if ultimoDepartamentoString != "" {
+		numero, erro := strconv.ParseInt(ultimoDepartamentoString, 10, 64)
+		if erro != nil {
+			return contexto.JSON(http.StatusBadRequest, "Número do último departamento inválido")
+		}
+		ultimoDepartamento = &numero
+	}
 
 	departamentos, erro := c.departamentoService.ObterDepartamentosPaginado(contexto.Request().Context(), pesquisa, ultimoDepartamento)
 	if erro != nil {

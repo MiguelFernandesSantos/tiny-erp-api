@@ -1,13 +1,15 @@
 package departamento_dao
 
 const (
-	// TODO arrumar query por conta da pesquisa e também a de produtos
 	QUERY_BUSCAR_DEPARTAMENTOS_PAGINADO = ` 
 		SELECT
 		    codigo,
 		    nome
 		FROM departamento
-		WHERE (nome, codigo) > (?, ?)
+		WHERE nome LIKE ?
+		AND codigo > ?
+		ORDER BY codigo
+		LIMIT 24
 	`
 
 	QUERY_VERIFICAR_DISPONIBILIDADE_NOME_DEPARTAMENTO = `

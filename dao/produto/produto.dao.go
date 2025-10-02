@@ -18,8 +18,15 @@ func InstanciarProdutoDao(conexao *conexao_mysql.MySQL) *ProdutoDao {
 	}
 }
 
-func (d *ProdutoDao) ObterProdutosPaginado(context context.Context, pesquisa string, ultimoProduto *int) ([]*model.ProdutoResumido, error) {
-	resultados, erro := d.conexao.Select(QUERY_BUSCAR_PRODUTOS_PAGINADO, pesquisa, ultimoProduto)
+func (d *ProdutoDao) ObterProdutosPaginado(context context.Context, pesquisa string, ultimoProduto *int64) ([]*model.ProdutoResumido, error) {
+	pesquisaLike := "%" + pesquisa + "%"
+
+	if ultimoProduto == nil {
+		ultimoProduto = new(int64)
+		*ultimoProduto = 0
+	}
+
+	resultados, erro := d.conexao.Select(QUERY_BUSCAR_PRODUTOS_PAGINADO, pesquisaLike, ultimoProduto)
 	if erro != nil {
 		return nil, erro
 	}

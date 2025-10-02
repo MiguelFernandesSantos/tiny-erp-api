@@ -31,8 +31,19 @@ func InstanciarProdutoController(grupoV1 *echo.Group, produtoService *service.Pr
 }
 
 func (controller *ProdutoController) obterProdutosPaginado(contexto echo.Context) error {
-	pesquisa := ""
-	var ultimoProduto *int // TODO precisa receber esses dois valores
+	var (
+		pesquisa            = contexto.QueryParam("pesquisa")
+		ultimoProdutoString = contexto.QueryParam("ultimoProduto")
+		ultimoProduto       *int64
+	)
+
+	if ultimoProdutoString != "" {
+		numero, erro := strconv.ParseInt(ultimoProdutoString, 10, 64)
+		if erro != nil {
+			return contexto.JSON(http.StatusBadRequest, "Número do último produto inválido")
+		}
+		ultimoProduto = &numero
+	}
 
 	produtos, erro := controller.produtoService.ObterProdutosPaginado(contexto.Request().Context(), pesquisa, ultimoProduto)
 	if erro != nil {

@@ -13,7 +13,10 @@ const (
 		FROM produto
 		INNER JOIN departamento ON produto.codigo_departamento = departamento.codigo
 		INNER JOIN secao ON produto.codigo_secao = secao.codigo
-		WHERE (produto.plu, produto.descricao) > (?, ?)
+		WHERE produto.descricao LIKE ?
+		AND produto.plu > ?
+		ORDER BY produto.plu
+		LIMIT 24
 	`
 
 	QUERY_VERIFICAR_DISPONIBILIDADE_PLU = `

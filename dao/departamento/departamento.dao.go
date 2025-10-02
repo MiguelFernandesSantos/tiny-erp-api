@@ -17,7 +17,14 @@ func InstanciarDepartamentoDao(conexao *conexao_mysql.MySQL) *DepartamentoDao {
 }
 
 func (d *DepartamentoDao) ObterDepartamentosPaginado(context context.Context, pesquisa string, ultimoDepartamento *int64) ([]*model.Departamento, error) {
-	resultados, erro := d.conexao.Select(QUERY_BUSCAR_DEPARTAMENTOS_PAGINADO, pesquisa, ultimoDepartamento)
+	pesquisaLike := "%" + pesquisa + "%"
+
+	if ultimoDepartamento == nil {
+		ultimoDepartamento = new(int64)
+		*ultimoDepartamento = 0
+	}
+
+	resultados, erro := d.conexao.Select(QUERY_BUSCAR_DEPARTAMENTOS_PAGINADO, pesquisaLike, ultimoDepartamento)
 	if erro != nil {
 		return nil, erro
 	}

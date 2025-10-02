@@ -33,7 +33,7 @@ func (s *ProdutoService) Inicializar(
 	s.departamentoService = departamentoService
 }
 
-func (s *ProdutoService) ObterProdutosPaginado(contexto context.Context, pesquisa string, ultimoProduto *int) ([]*model.ProdutoResumido, error) {
+func (s *ProdutoService) ObterProdutosPaginado(contexto context.Context, pesquisa string, ultimoProduto *int64) ([]*model.ProdutoResumido, error) {
 	log.Start(contexto, "Iniciando busca paginada de produtos")
 	produtos, erro := s.produtoDao.ObterProdutosPaginado(contexto, pesquisa, ultimoProduto)
 	if erro != nil {
