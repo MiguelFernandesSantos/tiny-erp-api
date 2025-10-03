@@ -222,6 +222,6 @@ func (c *DepartamentoController) tratarErros(contexto echo.Context, erro error) 
 	case errors.Is(erro, model.PossuiSecoesAssociadas):
 		return contexto.JSON(http.StatusConflict, erro.Error())
 	default:
-		return contexto.JSON(http.StatusInternalServerError, erro.Error())
+		return contexto.JSON(http.StatusInternalServerError, "Ocorreu um erro interno no servidor!")
 	}
 }

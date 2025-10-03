@@ -118,18 +118,6 @@ type ProdutoResumido struct {
 	BloqueadoSaida   *bool   `json:"bloqueado_saida,omitempty"`
 }
 
-func (p *ProdutoResumido) Validar(pluObrigatorio bool) error {
-	if p.Plu == nil && pluObrigatorio {
-		return fmt.Errorf("O produto enviado não tem PLU")
-	}
-
-	if p.Descricao == nil || *p.Descricao == "" {
-		return fmt.Errorf("A descricao do produto nao foi informada")
-	}
-
-	return nil
-}
-
 func (p *ProdutoResumido) PluComoString() *string {
 	if p.Plu != nil {
 		plu := strconv.FormatInt(*p.Plu, 10)

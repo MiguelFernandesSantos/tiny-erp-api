@@ -4,6 +4,7 @@ import (
 	"api-produtos/controller"
 	departamento_dao "api-produtos/dao/departamento"
 	"api-produtos/dao/produto"
+	usuario_dao "api-produtos/dao/usuario"
 	log "api-produtos/internal"
 	conexao_mysql "api-produtos/internal/database"
 	"api-produtos/internal/state"
@@ -19,7 +20,8 @@ import (
 // DAO
 var (
 	produtoDao      *produto_dao.ProdutoDao
-	departamentodao *departamento_dao.DepartamentoDao
+	departamentoDao *departamento_dao.DepartamentoDao
+	usuarioDao      *usuario_dao.UsuarioDao
 )
 
 // SERVICES
@@ -28,6 +30,8 @@ var (
 	produtoApiEmbeddingService *api.ProdutoApiEmbeddingService
 
 	departamentoService *service.DepartamentoService
+
+	usuarioService *service.UsuarioService
 )
 
 // EMBED
@@ -52,21 +56,27 @@ func RegistrarDependencias(contextoBackgroud context.Context, apiRoot *echo.Echo
 
 	controller.InstanciarProdutoController(grupoV1, produtoService)
 	controller.InstanciarDepartamentoController(grupoV1, departamentoService)
+	controller.InstanciarUsuarioController(grupoV1, usuarioService)
 }
 
 func instanciarDAOs(conexao *conexao_mysql.MySQL) {
 	produtoDao = produto_dao.InstanciarProdutoDao(conexao)
-	departamentodao = departamento_dao.InstanciarDepartamentoDao(conexao)
+	departamentoDao = departamento_dao.InstanciarDepartamentoDao(conexao)
+	usuarioDao = usuario_dao.InstanciarUsuarioDao(conexao)
 }
 
 func instanciarServices() {
 	produtoApiEmbeddingService = api.InstanciarProdutoApiEmbeddingService()
 	produtoService = service.InstanciarProdutoService()
 	departamentoService = service.InstanciarDepartamentoService()
+	usuarioService = service.InstanciarUsuarioService()
 }
 
 func inicializarServices(conexao *conexao_mysql.MySQL) {
 	produtoApiEmbeddingService.Inicializar(state.URL_API_EMBEDDING, state.UTILIZAR_API_EMBEDDING)
 	produtoService.Inicializar(produtoDao, produtoApiEmbeddingService, departamentoService, conexao)
-	departamentoService.Inicializar(departamentodao, conexao)
+
+	departamentoService.Inicializar(departamentoDao, conexao)
+
+	usuarioService.Inicializar(usuarioDao, conexao)
 }
