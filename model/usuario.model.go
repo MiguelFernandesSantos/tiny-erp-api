@@ -19,7 +19,7 @@ type Usuario struct {
 	Email  *string `json:"email"`
 	Ativo  *bool   `json:"ativo"`
 	Perfil *Perfil `json:"perfil"`
-	Senha  *string `json:"senha"`
+	Senha  *string `json:"senha,omitempty"`
 }
 
 func (u *Usuario) Validar() error {
@@ -58,4 +58,6 @@ var (
 	UsuarioNaoEncontrado = errors.New("usuário não encontrado")
 	UsuarioInativo       = errors.New("usuário inativo")
 	UsuarioJaExiste      = errors.New("usuário com o mesmo email já existe")
+	SenhaIncorreta       = errors.New("senha incorreta")
+	UsuarioDesativado    = errors.New("usuário desativado")
 )

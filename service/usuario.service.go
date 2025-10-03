@@ -10,16 +10,18 @@ import (
 )
 
 type UsuarioService struct {
-	usuarioDao       *usuario_dao.UsuarioDao
-	transacaoService conexao_mysql.TransacaoService
+	usuarioDao          *usuario_dao.UsuarioDao
+	criptografiaService *CriptografiaService
+	transacaoService    conexao_mysql.TransacaoService
 }
 
 func InstanciarUsuarioService() *UsuarioService {
 	return &UsuarioService{}
 }
 
-func (s *UsuarioService) Inicializar(usuarioDao *usuario_dao.UsuarioDao, transacaoService conexao_mysql.TransacaoService) {
+func (s *UsuarioService) Inicializar(usuarioDao *usuario_dao.UsuarioDao, criptografiaService *CriptografiaService, transacaoService conexao_mysql.TransacaoService) {
 	s.usuarioDao = usuarioDao
+	s.criptografiaService = criptografiaService
 	s.transacaoService = transacaoService
 }
 
@@ -45,7 +47,13 @@ func (s *UsuarioService) AdicionarUsuario(context context.Context, usuario *mode
 		return erro
 	}
 
-	erro = s.usuarioDao.AdicionarUsuario(context, usuario)
+	senhaCriptografada, erro := s.criptografiaService.CriptografarSenha(*usuario.Senha)
+	if erro != nil {
+		log.Exception(context, "Ocorreu um erro ao tentar criptografar a senha do usuário", &erro)
+		return erro
+	}
+
+	erro = s.usuarioDao.AdicionarUsuario(context, usuario, senhaCriptografada)
 	if erro != nil {
 		log.Exception(context, "Ocorreu um erro ao tentar adicionar o novo usuário no banco de dados", &erro)
 		return erro
@@ -79,4 +87,27 @@ func (s *UsuarioService) DesativarUsuarioEspecifico(context context.Context, ult
 
 	log.Success(context, "Desativação de usuário específico realizada com sucesso")
 	return nil
+}
+
+func (s *UsuarioService) ObterSenhaUsuario(context context.Context, email *string) (*string, error) {
+	log.Start(context, "Iniciando busca da senha do usuário de email: "+*email)
+	senha, erro := s.usuarioDao.ObterSenhaUsuario(context, email)
+	if erro != nil {
+		log.Exception(context, "Ocorreu um erro ao buscar a senha do usuário", &erro)
+		return nil, erro
+	}
+	log.Success(context, "Busca da senha do usuário realizada com sucesso")
+	return senha, nil
+
+}
+
+func (s *UsuarioService) ObterDadosAutenticacaoUsuario(context context.Context, email *string) (*model.UsuarioAutenticado, error) {
+	log.Start(context, "Iniciando busca dos dados de autenticação do usuário de email: "+*email)
+	dadosAutenticacao, erro := s.usuarioDao.ObterDadosAutenticacaoUsuario(context, email)
+	if erro != nil {
+		log.Exception(context, "Ocorreu um erro ao buscar os dados de autenticação do usuário", &erro)
+		return nil, erro
+	}
+	log.Success(context, "Busca dos dados de autenticação do usuário realizada com sucesso")
+	return dadosAutenticacao, nil
 }

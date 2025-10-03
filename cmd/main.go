@@ -2,7 +2,7 @@ package main
 
 import (
 	api_produtos "api-produtos"
-	log "api-produtos/internal"
+	internal "api-produtos/internal"
 	conexao_mysql "api-produtos/internal/database"
 	"api-produtos/internal/echo_config"
 	"api-produtos/internal/state"
@@ -20,47 +20,47 @@ import (
 )
 
 func main() {
-	log.Inicializar(log.ConfiguracaoPadrao())
+	internal.Inicializar(internal.ConfiguracaoPadrao())
 
 	contextoBackgroud := context.Background()
 
-	log.Start(contextoBackgroud, "Iniciando API")
+	internal.Start(contextoBackgroud, "Iniciando API")
 	api := echo.New()
 
 	erro := godotenv.Load()
 	if erro != nil {
-		log.Info(contextoBackgroud, "Nenhum arquivo .env encontrado")
+		internal.Info(contextoBackgroud, "Nenhum arquivo .env encontrado")
 	}
 
-	log.Info(contextoBackgroud, "Configurando CORS")
+	internal.Info(contextoBackgroud, "Configurando CORS")
 	echo_config.ConfigurarCORS(api)
 
-	log.Info(contextoBackgroud, "Configurando validador JSON")
+	internal.Info(contextoBackgroud, "Configurando validador JSON")
 	api.Validator = configurarValidadorJson()
 
 	api.Use(echo_config.RequestIDMiddleware)
 
 	parametrosBanco, erro := obterParametrosBanco()
 	if erro != nil {
-		log.Exception(contextoBackgroud, "Ocorreu um erro ao tentar obter os dados do banco de dados", &erro)
+		internal.Exception(contextoBackgroud, "Ocorreu um erro ao tentar obter os dados do banco de dados", &erro)
 		os.Exit(1)
 	}
 
 	conexaoBanco, erro := conexao_mysql.NovaConexao(parametrosBanco.Host, parametrosBanco.Usuario, parametrosBanco.Senha, parametrosBanco.NomeBanco)
 	if erro != nil {
-		log.Exception(contextoBackgroud, "Ocorreu um erro ao tentar conectar com o banco de dados com os dados fornecedos", &erro)
+		internal.Exception(contextoBackgroud, "Ocorreu um erro ao tentar conectar com o banco de dados com os dados fornecedos", &erro)
 		os.Exit(1)
 	}
 
 	state.URL_API_EMBEDDING, erro = obterVariavelAmbiente("URL_API_EMBEDDING")
 	if erro != nil {
-		log.Exception(contextoBackgroud, "Nao foi encontrado a URL da api de embedding", &erro)
+		internal.Exception(contextoBackgroud, "Nao foi encontrado a URL da api de embedding", &erro)
 		os.Exit(1)
 	}
 
 	utilizaEmbedding, erro := obterVariavelAmbiente("UTILIZAR_API_EMBEDDING")
 	if erro != nil {
-		log.Exception(contextoBackgroud, "Nao foi encontrado a variavel de ambiente que define se utiliza a api de embedding", &erro)
+		internal.Exception(contextoBackgroud, "Nao foi encontrado a variavel de ambiente que define se utiliza a api de embedding", &erro)
 		os.Exit(1)
 	}
 
@@ -72,7 +72,7 @@ func main() {
 
 	porta, erro := obterVariavelAmbiente("PORTA_API")
 	if erro != nil {
-		log.Info(contextoBackgroud, "Variavel de ambiente referente a porta não encontrada, subindo como porta padrao 8081")
+		internal.Info(contextoBackgroud, "Variavel de ambiente referente a porta não encontrada, subindo como porta padrao 8081")
 		porta = "8081"
 	}
 

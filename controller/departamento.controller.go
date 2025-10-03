@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"api-produtos/internal/echo_config"
 	"api-produtos/model"
 	"api-produtos/service"
 	"errors"
@@ -20,6 +21,7 @@ func InstanciarDepartamentoController(grupoV1 *echo.Group, departamentoService *
 	}
 
 	grupoDepartamentos := grupoV1.Group("/departamento")
+	grupoDepartamentos.Use(echo_config.JWTMiddleware())
 
 	grupoDepartamentos.GET("", controller.obterDepartamentosPaginado)
 	grupoDepartamentos.POST("", controller.adicionarDepartamento)

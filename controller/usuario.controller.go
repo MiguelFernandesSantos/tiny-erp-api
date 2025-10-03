@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"api-produtos/internal/echo_config"
 	"api-produtos/model"
 	"api-produtos/service"
 	"errors"
@@ -20,6 +21,7 @@ func InstanciarUsuarioController(grupoV1 *echo.Group, usuarioService *service.Us
 	}
 
 	grupoUsuarios := grupoV1.Group("/usuario")
+	grupoUsuarios.Use(echo_config.JWTMiddleware())
 
 	grupoUsuarios.GET("", controller.obterUsuariosPaginado)
 	grupoUsuarios.POST("", controller.adicionarUsuario)
@@ -65,7 +67,6 @@ func (c *UsuarioController) adicionarUsuario(contexto echo.Context) error {
 		return contexto.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	// TODO criptografar a senha antes de adicionar
 	erro := c.usuarioService.AdicionarUsuario(contexto.Request().Context(), usuario)
 	if erro != nil {
 		return c.tratarErros(contexto, erro)

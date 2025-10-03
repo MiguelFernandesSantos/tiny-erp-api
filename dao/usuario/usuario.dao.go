@@ -51,9 +51,9 @@ func (d *UsuarioDao) VerificarDisponibilidadeEmail(contexto context.Context, ema
 	return nil
 }
 
-func (d *UsuarioDao) AdicionarUsuario(contexto context.Context, usuario *model.Usuario) error {
+func (d *UsuarioDao) AdicionarUsuario(contexto context.Context, usuario *model.Usuario, senhaCriptografada *string) error {
 	dataAtual := model.DataHoraAtual().FormatarISO8601()
-	erro := d.conexao.Update(QUERY_INSERIR_NOVO_USUARIO, usuario.Nome, usuario.Email, usuario.Senha, usuario.Perfil, dataAtual)
+	erro := d.conexao.Update(QUERY_INSERIR_NOVO_USUARIO, usuario.Nome, usuario.Email, senhaCriptografada, usuario.Perfil, dataAtual)
 	if erro != nil {
 		return erro
 	}
@@ -82,4 +82,39 @@ func (d *UsuarioDao) DesativarUsuarioEspecifico(contexto context.Context, usuari
 		return erro
 	}
 	return nil
+}
+
+func (d *UsuarioDao) ObterSenhaUsuario(contexto context.Context, email *string) (*string, error) {
+	resultados, erro := d.conexao.Select(QUERY_BUSCAR_SENHA_USUARIO_POR_EMAIL, email)
+	if erro != nil {
+		return nil, erro
+	}
+
+	if len(resultados) == 0 {
+		return nil, model.UsuarioNaoEncontrado
+	}
+
+	usuarioAsMap := resultados[0]
+
+	ativo := *usuarioAsMap["ativo"].(*int64) == 1
+	if !ativo {
+		return nil, model.UsuarioInativo
+	}
+
+	return usuarioAsMap["senha"].(*string), nil
+}
+
+func (d *UsuarioDao) ObterDadosAutenticacaoUsuario(contexto context.Context, email *string) (*model.UsuarioAutenticado, error) {
+	resultados, erro := d.conexao.Select(QUERY_BUSCAR_DADOS_AUTENTICACAO_USUARIO_POR_EMAIL, email)
+	if erro != nil {
+		return nil, erro
+	}
+
+	if len(resultados) == 0 {
+		return nil, model.UsuarioNaoEncontrado
+	}
+
+	usuarioAsMap := resultados[0]
+
+	return d.mapearUsuarioAutenticado(usuarioAsMap), nil
 }
