@@ -3,6 +3,7 @@ package api_produtos
 import (
 	"api-produtos/controller"
 	departamento_dao "api-produtos/dao/departamento"
+	permissoes_dao "api-produtos/dao/permissoes"
 	"api-produtos/dao/produto"
 	usuario_dao "api-produtos/dao/usuario"
 	internal "api-produtos/internal"
@@ -22,6 +23,7 @@ var (
 	produtoDao      *produto_dao.ProdutoDao
 	departamentoDao *departamento_dao.DepartamentoDao
 	usuarioDao      *usuario_dao.UsuarioDao
+	permissoesDao   *permissoes_dao.PermissoesDao
 )
 
 // SERVICES
@@ -38,6 +40,8 @@ var (
 	tokenService *service.TokenService
 
 	criptografiaService *service.CriptografiaService
+
+	permissoesService *service.PermissoesService
 )
 
 // EMBED
@@ -88,6 +92,7 @@ func instanciarDAOs(conexao *conexao_mysql.MySQL) {
 	produtoDao = produto_dao.InstanciarProdutoDao(conexao)
 	departamentoDao = departamento_dao.InstanciarDepartamentoDao(conexao)
 	usuarioDao = usuario_dao.InstanciarUsuarioDao(conexao)
+	permissoesDao = permissoes_dao.InstanciarPermissoesDao(conexao)
 }
 
 func instanciarServices() {
@@ -98,6 +103,7 @@ func instanciarServices() {
 	autenticacaoService = service.InstanciarAutenticacaoService()
 	tokenService = service.InstanciarTokenService()
 	criptografiaService = service.InstanciarCriptografiaService()
+	permissoesService = service.InstanciarPermissoesService()
 }
 
 func inicializarServices(conexao *conexao_mysql.MySQL) {
@@ -109,6 +115,8 @@ func inicializarServices(conexao *conexao_mysql.MySQL) {
 	usuarioService.Inicializar(usuarioDao, criptografiaService, conexao)
 
 	autenticacaoService.Inicializar(usuarioService, tokenService, criptografiaService)
+
+	permissoesService.Inicializar(permissoesDao)
 }
 
 func inicializarController(grupoV1 *echo.Group) {
@@ -116,4 +124,5 @@ func inicializarController(grupoV1 *echo.Group) {
 	controller.InstanciarDepartamentoController(grupoV1, departamentoService)
 	controller.InstanciarUsuarioController(grupoV1, usuarioService)
 	controller.InstanciarAutenticacaoController(grupoV1, autenticacaoService)
+	controller.InstanciarPermissoesController(grupoV1, permissoesService)
 }
